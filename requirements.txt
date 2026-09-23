@@ -1,7 +1,6 @@
 streamlit
+langchain
 langgraph
-langchain-core
-langchain-groq
+langgraph-checkpoint-sqlite
+groq
 python-dotenv
-pydantic
-requests
