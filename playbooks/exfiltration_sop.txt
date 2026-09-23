@@ -1,0 +1,7 @@
+
+STANDARD OPERATING PROCEDURE: DATA EXFILTRATION & C2 COMMUNICATIONS (CRITICAL SEVERITY)
+1. TRAFFIC SEVERATION: Terminate all active external socket connections and isolate the source host immediately.
+2. FIREWALL BLOCKLIST: Add destination external IPs and domains to the edge firewall blocklist.
+3. DATA ACCESS AUDIT: Query database logs and file share access logs to determine what sensitive data or volumes were accessed prior to exfiltration.
+4. FORENSIC TRIAGE: Inspect process command lines for encoded payloads, SFTP tools, or unauthorized cloud storage sync clients.
+5. COMPLIANCE NOTIFICATION: Create an escalated incident ticket and notify the Data Protection Officer (DPO) if PII/regulated data was exposed.

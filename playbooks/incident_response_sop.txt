@@ -1,0 +1,14 @@
+# INCIDENT RESPONSE STANDARD OPERATING PROCEDURE (SOP)
+
+## 1. Ransomware & Malware Executions (High Severity)
+- If a known malicious payload (e.g., PowerShell download-and-execute) is detected, the host must be quarantined immediately.
+- DO NOT reset user credentials until the host is isolated, as the attacker may use the new credentials for lateral movement.
+- Mandatory Action: You must explicitly recommend notifying the on-call Incident Commander (IC) in your final report.
+
+## 2. Suspicious Outbound Connections (C2 Traffic)
+- Verify the destination IP against Threat Intelligence feeds.
+- If malicious, immediately block the IP at the perimeter firewall.
+
+## 3. Account Compromise & Credential Theft
+- If an account is suspected of compromise, verify if MFA was bypassed.
+- If MFA was bypassed, initiate a full credential reset ONLY AFTER the affected endpoint is isolated.

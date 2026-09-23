@@ -1,0 +1,7 @@
+
+STANDARD OPERATING PROCEDURE: RANSOMWARE & MALWARE CONTAINMENT (HIGH SEVERITY)
+1. IMMEDIATE ISOLATION: Instantly isolate the compromised endpoint from the network using network quarantine tools to prevent lateral movement.
+2. CREDENTIAL REVOCATION: Force a password reset for any service or user accounts compromised during the initial vector (e.g., svc_backup).
+3. FORENSIC PRESERVATION: Capture full memory dumps and disk images for post-incident analysis.
+4. PERIMETER DEFENSE: Block outbound connections to identified Command and Control (C2) IP addresses at the firewall level.
+5. ESCALATION: Create an immediate high-priority ticket in ServiceNow/Jira and notify the on-call Incident Commander.

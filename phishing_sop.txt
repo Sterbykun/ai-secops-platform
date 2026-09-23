@@ -1,0 +1,6 @@
+STANDARD OPERATING PROCEDURE: PHISHING & CREDENTIAL COMPROMISE (MEDIUM/HIGH SEVERITY)
+1. SESSION REVOCATION: Immediately revoke all active OAuth tokens and active sessions for the compromised user account.
+2. IDENTITY AUDIT: Review auth_logs for unexpected multi-factor authentication (MFA) bypasses, impossible travel, or suspicious IP logins.
+3. CREDENTIAL RESET: Enforce an immediate password reset and require temporary MFA re-enrollment.
+4. EMAIL FILTERING: Check inbound email mailboxes for similar phishing payloads or malicious links and purge them globally.
+5. TICKET CREATION: Log a security incident ticket detailing the compromised user principal and source IPs.
