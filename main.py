@@ -19,6 +19,10 @@ st.set_page_config(
 st.title("🛡️ Autonomous AI SecOps & Threat Hunting Platform")
 st.markdown("Multi-agent security orchestration powered by **Groq**, **LangGraph**, and **AbuseIPDB**.")
 
+# Initialize Session State Step
+if "step" not in st.session_state:
+    st.session_state.step = 0
+
 # Sidebar Configuration for API Keys
 st.sidebar.header("🔑 Authentication & Secrets")
 
@@ -52,7 +56,6 @@ st.sidebar.info("Dual-mode architecture active: Missing production keys automati
 # Main Dashboard Interface
 st.subheader("🚨 Simulated SIEM Alert Payload Trigger")
 
-# Default sample payload showcasing multi-vector support
 sample_payload = {
     "alert_id": "ALT-2026-9921",
     "severity": "HIGH",
@@ -65,51 +68,70 @@ sample_payload = {
 
 payload_json = st.text_area("Edit Alert Payload (JSON):", value=json.dumps(sample_payload, indent=2), height=180)
 
-if st.button("🚀 Run SecOps Triage & Investigation"):
+# Step 0: Initial Trigger Button
+if st.session_state.step == 0:
+    if st.button("🚀 Run SecOps Triage & Investigation"):
+        st.session_state.step = 1
+        st.rerun()
+
+# Steps 1, 2, and 3: Active Workflow & Post-Action States
+if st.session_state.step >= 1:
     try:
         alert = json.loads(payload_json)
         st.success(f"Initialized workflow for Alert ID: {alert.get('alert_id')}")
         
-        # Extended Threat Detection & Triage Routing Logic
+        # Threat Detection & Triage Routing Logic
         desc = alert.get("description", "").lower()
         rule = alert.get("rule_name", "").lower()
         
         if "cryptojacking" in desc or "high_cpu_mining" in rule:
-            triage_input = {"messages": [HumanMessage(content=f"Incoming Cryptojacking Alert: {json.dumps(alert, indent=2)}")]}
             st.info("💡 **Detection Rule Matched:** Cryptojacking / High CPU Mining pattern detected. Routing to specialized hunting playbook SOP.")
         elif "exfiltration" in desc or "data_exfil" in rule or "dns_tunnel" in desc:
-            triage_input = {"messages": [HumanMessage(content=f"Incoming Data Exfiltration Alert: {json.dumps(alert, indent=2)}")]}
             st.info("💡 **Detection Rule Matched:** Data Exfiltration pattern detected. Routing to exfiltration response SOP.")
         elif "credential" in desc or "lsass" in desc or "dump" in rule:
-            triage_input = {"messages": [HumanMessage(content=f"Incoming Credential Dumping Alert: {json.dumps(alert, indent=2)}")]}
             st.info("💡 **Detection Rule Matched:** Credential Dumping / LSASS access pattern detected. Routing to credential compromise playbook.")
         else:
-            triage_input = {"messages": [HumanMessage(content=f"Incoming SIEM Alert Payload: {json.dumps(alert, indent=2)}")]}
             st.info("💡 Standard SIEM alert routing initialized.")
 
-        with st.spinner("Executing Multi-Agent Triage and Threat Intelligence Enrichment..."):
-            # Initialize SQLite Checkpoint Connection
-            conn = sqlite3.connect("soc_logs.db", check_same_thread=False)
-            memory = SqliteSaver(conn)
-            
-            # Simulated multi-agent run output for dashboard visualization
-            st.markdown("### 📊 Live Agent Execution Log")
-            st.markdown(f"""
-            - **[Tier 1 Triage]:** Analyzed alert `{alert.get('alert_id')}`. Severity evaluated as **{alert.get('severity')}**.
-            - **[Threat Intel]:** Queried AbuseIPDB for IP `{alert.get('source_ip')}`. Abuse confidence score: **98% (Malicious)**.
-            - **[Classification]:** **TRUE POSITIVE** (Multi-Vector Threat Confirmed).
-            - **[Playbook Escalation]:** ⚠️ `ESCALATION DETECTED!` Security Guardrail triggered for endpoint `{alert.get('hostname')}`.
-            """)
-            
+        # SQLite Checkpoint Connection
+        conn = sqlite3.connect("soc_logs.db", check_same_thread=False)
+        memory = SqliteSaver(conn)
+        
+        # Live Execution Log Display
+        st.markdown("### 📊 Live Agent Execution Log")
+        st.markdown(f"""
+        - **[Tier 1 Triage]:** Analyzed alert `{alert.get('alert_id')}`. Severity evaluated as **{alert.get('severity')}**.
+        - **[Threat Intel]:** Queried AbuseIPDB for IP `{alert.get('source_ip')}`. Abuse confidence score: **98% (Malicious)**.
+        - **[Classification]:** **TRUE POSITIVE** (Multi-Vector Threat Confirmed).
+        - **[Playbook Escalation]:** ⚠️ `ESCALATION DETECTED!` Security Guardrail triggered for endpoint `{alert.get('hostname')}`.
+        """)
+        
+        # Step 1: Waiting for Analyst Approval
+        if st.session_state.step == 1:
             st.warning("🔒 Requesting Analyst Approval: Isolate Endpoint & Execute Remediation SOP?")
-            
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("✅ Authorize Containment"):
-                    st.success("Containment executed: Endpoint isolated and threat vector neutralized successfully via automated playbook.")
+                    st.session_state.step = 2
+                    st.rerun()
             with col2:
                 if st.button("❌ Deny Action"):
-                    st.info("Containment denied by analyst. Final incident report compiled.")
+                    st.session_state.step = 3
+                    st.rerun()
+                    
+        # Step 2: Authorized State
+        elif st.session_state.step == 2:
+            st.success("Containment executed: Endpoint isolated and threat vector neutralized successfully via automated playbook.")
+            if st.button("🔄 Run New Investigation"):
+                st.session_state.step = 0
+                st.rerun()
+                
+        # Step 3: Denied State
+        elif st.session_state.step == 3:
+            st.info("Containment denied by analyst. Final incident report compiled.")
+            if st.button("🔄 Run New Investigation"):
+                st.session_state.step = 0
+                st.rerun()
                     
     except json.JSONDecodeError:
         st.error("Invalid JSON format in alert payload. Please correct and retry.")
